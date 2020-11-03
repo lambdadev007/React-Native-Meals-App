@@ -4,6 +4,8 @@ import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import HeaderButton from "../components/HeaderButton";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../Constants/Colors";
+import { useDispatch } from 'react-redux';
+import { setFilters } from '../store/actions/meals';
 
 const FilterSwitch = (props) => {
   return (
@@ -22,6 +24,8 @@ const FilterSwitch = (props) => {
 const FiltersScreen = (props) => {
   const { navigation } = props;
 
+  const dispatch = useDispatch();
+
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isLactoseFree, setIsLactoseFree] = useState(false);
   const [isVegen, setIsVegen] = useState(false);
@@ -35,8 +39,9 @@ const FiltersScreen = (props) => {
       vegetarian: isVegetarian,
     };
 
+    dispatch(setFilters(appliedFilters));
     console.log("[saveFilters]", appliedFilters);
-  }, [isGlutenFree, isLactoseFree, isVegen, isVegetarian]);
+  }, [isGlutenFree, isLactoseFree, isVegen, isVegetarian, dispatch]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -63,17 +68,17 @@ const FiltersScreen = (props) => {
         onChange={(newValue) => setIsGlutenFree(newValue)}
       />
       <FilterSwitch
-        label="Gluten-free"
+        label="Lactose-free"
         state={isLactoseFree}
         onChange={(newValue) => setIsLactoseFree(newValue)}
       />
       <FilterSwitch
-        label="Gluten-free"
+        label="Vegen"
         state={isVegen}
         onChange={(newValue) => setIsVegen(newValue)}
       />
       <FilterSwitch
-        label="Gluten-free"
+        label="Vegetarian"
         state={isVegetarian}
         onChange={(newValue) => setIsVegetarian(newValue)}
       />

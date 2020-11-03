@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -8,12 +8,13 @@ import {
   Alert,
   Image,
 } from "react-native";
-import { MEALS } from "../Data/dummy-data";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import HeaderButton from "../components/HeaderButton";
 import DefaultText from "../components/DefaultText";
 import { Ionicons } from "@expo/vector-icons";
 import { Directions } from "react-native-gesture-handler";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleFavorite } from "../store/actions/meals";
 
 const ListItem = (props) => {
   return (
@@ -24,8 +25,51 @@ const ListItem = (props) => {
 };
 
 const MealDetailScreen = (props) => {
+  // const [isFavorited, setIsFavorited] = useState(false);
+  const availableMeals = useSelector((state) => state.meals.meals);
   const { mealId } = props.route.params;
-  const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+
+  const isFav = useSelector((state) =>
+    state.meals.favoriteMeals.some((meal) => meal.id === mealId)
+  );
+  const navigation = props.navigation;
+
+  const selectedMeal = availableMeals.find((meal) => meal.id === mealId);
+
+  const dispatch = useDispatch();
+
+  const toggleFavoriteHandler = useCallback(() => {
+    dispatch(toggleFavorite(mealId));
+  }, [dispatch, mealId]);
+
+  // useEffect(() => {
+  //   const existingIndex = favMeals.findIndex((meal) => meal.id === mealId);
+  //   console.log("[existingIndex]", existingIndex);
+  //   if (existingIndex >= 0) {
+  //     setIsFavorited(true);
+  //   } else {
+  //     setIsFavorited(false);
+  //   }
+  // }, [favMeals, mealId]);
+
+  useEffect(() => {
+    // props.navigation.setParams({ mealTitle: selectedMeal.title });
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            <Item
+              title="Favorite"
+              iconName={isFav ? "ios-star" : "ios-star-outline"}
+              onPress={() => {
+                toggleFavoriteHandler();
+              }}
+            />
+          </HeaderButtons>
+        );
+      },
+    });
+  }, [toggleFavoriteHandler, isFav]);
 
   return (
     <ScrollView>
@@ -48,24 +92,10 @@ const MealDetailScreen = (props) => {
 };
 
 MealDetailScreen.navigationOptions = (navigationData) => {
-  const { mealId } = navigationData.route.params;
-  const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+  const { mealTitle } = navigationData.route.params;
 
   return {
-    headerTitle: selectedMeal.title,
-    headerRight: () => {
-      return (
-        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-          <Item
-            title="Favorite"
-            iconName="ios-star"
-            onPress={() => {
-              alert("Mark as favorite!");
-            }}
-          />
-        </HeaderButtons>
-      );
-    },
+    headerTitle: mealTitle,
   };
 };
 
@@ -85,12 +115,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   listItem: {
-      marginVertical: 10,
-      marginHorizontal: 20,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      padding: 10
-  }
+    marginVertical: 10,
+    marginHorizontal: 20,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 10,
+  },
 });
 
 export default MealDetailScreen;
